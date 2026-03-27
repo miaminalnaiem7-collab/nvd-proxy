@@ -5,7 +5,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Missing year parameter" });
   }
 
-  const apiUrl = `https://services.nvd.nist.gov/rest/json/cves/2.0?pubStartDate=${year}-01-01T00:00:00:000`;
+  const start = `${year}-01-01T00:00:00.000`;
+  const end = `${year}-12-31T23:59:59.000`;
+
+  const apiUrl = `https://services.nvd.nist.gov/rest/json/cves/2.0?pubStartDate=${start}&pubEndDate=${end}`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -14,8 +17,18 @@ export default async function handler(req, res) {
       }
     });
 
-    const data = await response.json();
-    return res.status(200).json(data);
+    // لو الـ response مو JSON كامل
+    const text = await response.text();
+
+    try {
+      const data = JSON.parse(text);
+      return res.status(200).json(data);
+    } catch (jsonErr) {
+      return res.status(500).json({
+        error: "Invalid JSON from NVD",
+        raw: text
+      });
+    }
 
   } catch (err) {
     return res.status(500).json({ error: "Proxy error", details: err.message });
