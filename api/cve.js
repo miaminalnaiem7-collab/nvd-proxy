@@ -5,32 +5,18 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Missing year parameter" });
   }
 
-  const start = `${year}-01-01T00:00:00.000`;
-  const end = `${year}-12-31T23:59:59.000`;
-
-  const apiUrl = `https://services.nvd.nist.gov/rest/json/cves/2.0?pubStartDate=${start}&pubEndDate=${end}`;
+  const apiUrl = `https://cve.circl.lu/api/query?time_modified=${year}`;
 
   try {
-    const response = await fetch(apiUrl, {
-      headers: {
-        "X-Api-Key": "524f4305-dc03-48b7-ad03-e3c7cf5b32df",
-        "User-Agent": "Mozilla/5.0 (compatible; MyProxy/1.0)"
-      }
-    });
+    const response = await fetch(apiUrl);
+    const data = await response.json();
 
-    const text = await response.text();
-
-    try {
-      const data = JSON.parse(text);
-      return res.status(200).json(data);
-    } catch {
-      return res.status(500).json({
-        error: "Invalid JSON from NVD",
-        raw: text
-      });
-    }
+    return res.status(200).json(data);
 
   } catch (err) {
-    return res.status(500).json({ error: "Proxy error", details: err.message });
+    return res.status(500).json({
+      error: "Proxy error",
+      details: err.message
+    });
   }
 }
