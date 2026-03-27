@@ -13,17 +13,17 @@ export default async function handler(req, res) {
   try {
     const response = await fetch(apiUrl, {
       headers: {
-        "X-Api-Key": "524f4305-dc03-48b7-ad03-e3c7cf5b32df"
+        "X-Api-Key": "524f4305-dc03-48b7-ad03-e3c7cf5b32df",
+        "User-Agent": "Mozilla/5.0 (compatible; MyProxy/1.0)"
       }
     });
 
-    // لو الـ response مو JSON كامل
     const text = await response.text();
 
     try {
       const data = JSON.parse(text);
       return res.status(200).json(data);
-    } catch (jsonErr) {
+    } catch {
       return res.status(500).json({
         error: "Invalid JSON from NVD",
         raw: text
