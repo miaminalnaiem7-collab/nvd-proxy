@@ -1,23 +1,21 @@
 export default async function handler(req, res) {
-  const year = req.query.year;
+  const keyword = req.query.keyword;
 
-  if (!year) {
-    return res.status(400).json({ error: "Missing year parameter" });
+  if (!keyword) {
+    return res.status(400).json({ error: "Missing keyword parameter" });
   }
 
-  const apiUrl = `https://cve.circl.lu/api/last`;
-
   try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-
-    // فلترة النتائج حسب السنة
-    const filtered = data.filter(item => {
-      if (!item.last_modified) return false;
-      return item.last_modified.startsWith(year);
+    const response = await fetch("https://api.osv.dev/v1/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        "query": keyword
+      })
     });
 
-    return res.status(200).json(filtered);
+    const data = await response.json();
+    return res.status(200).json(data);
 
   } catch (err) {
     return res.status(500).json({
